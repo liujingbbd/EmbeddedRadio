@@ -1,0 +1,140 @@
+设为首页收藏本站开启辅助访问切换到宽版
+OpenWrt中文网
+用户名
+	自动登录	 找回密码
+密码		登录	 立即注册
+QQ登录
+只需一步，快速开始
+快捷导航
+帮助OpenWrt中文网下载中心开发中心门户帮助OpenWrt中文网家园帮助排行榜高级搜索
+装机设主页 每台赚5.2元  终身领工资
+	
+帖子
+搜索	
+热搜: 摄像头网络摄像头定时开关U盘下载机移动硬盘4530声卡u盘WLAN交换机花生壳自动代理内存小Asterisk300rv3多拨hg255d叠加nwan
+OpenWrt中文网?论坛?OpenWrt?教程方案专区?编写简单php,实现网络收音机web转台功能
+123 / 3 页下一页
+返回列表发新帖
+查看: 14449|回复: 20
+打印 上一主题 下一主题 编写简单php,实现网络收音机web转台功能 [复制链接]
+精华
+
+电梯直达跳转到指定楼层 1#
+ i6p 发表于 2010-12-21 21:53:45 | 只看该作者 回帖奖励
+折腾目的:没有USB红外遥控器套件,通过安装lighttpd+php,编写简单php,实现播放网络电台web转台功能
+环境:336固件
+需要软件:mplayer,screen,lighttpd,php5
+
+首先,感谢nighthk3编译了带Rockbox定点库的mplayer，使db120等mips路邮实现播放mms电台，变身为网络收音机。
+详细见： http://openwrt.org.cn/bbs/viewth ... &extra=page%3D1
+
+1、安装USB声卡驱动,测试mplayer能否正常播放mms网络电台.
+   USB声卡驱动及mplayer下载详见http://openwrt.org.cn/bbs/viewth ... &extra=page%3D1
+   安装好后,我把mplayer拷到/usr/bin下,方便在命令提示符下可以直接执行
+   测试播放:mplayer mms://live.cri.cn/oldies 能正常播放就OK了.
+   
+2、安装lighttpd+php5，提供web和php支持
+   详见帖子：http://www.openwrt.org.cn/bbs/vi ... amp;page=1#pid14409
+   编写info.php，测试能显示php信息就OK了。
+   注意：（1）由于php外部调用mplayer需要root权限，因此lighttpd启动配置要用root权限（可参考附近lighttpd.conf配置）。
+         （2）系统运web服务uhttpd使用了80端口，lightppd需配置为其他端口（如81,88等）。
+   
+3、安装screen，使mplayer可以后台运行
+   opkg install screen
+4、拷入web转台php
+   解开附件，将index.php c_radio.php拷入lighttpd的根目录，我的配置为/myweb
+   重启lighttpd
+5、测试php播放控制
+   浏览器打开http://YourIP:XX
+   选择电台后，确定。。。。。。你应该可以听到声音了。（可以安装htop看看有没有正常运行mplayer）
+   自行增加电台，可以修改index.php。
+   
+6、设置开机播放指定电台。
+   将附件的radio拷到/etc/init.d/目录下，修改/etc/rc.local ，将/etc/init.d/radio加进去。
+  
+本帖子中包含更多资源
+
+您需要 登录 才可以下载或查看，没有帐号？立即注册  
+x
+分享到:  
+QQ好友和群QQ好友和群
+ 
+QQ空间QQ空间
+ 
+腾讯微博腾讯微博
+ 
+腾讯朋友腾讯朋友
+ 收藏收藏20
+ 
+分享分享
+回复 使用道具 举报
+
+2#
+ admin 发表于 2010-12-21 23:46:32 | 只看该作者
+不得不顶
+回复 支持 反对 使用道具 举报
+
+3#
+ yysolid 发表于 2010-12-22 02:43:17 | 只看该作者
+顶 讲解得不错
+回复 支持 反对 使用道具 举报
+
+4#
+ xrff_z 发表于 2010-12-28 08:25:17 | 只看该作者
+非常感谢。
+回复 支持 反对 使用道具 举报
+
+5#
+ bxf3000 发表于 2011-1-2 19:33:22 | 只看该作者
+LZ实在是高手，不知道您有没有时间结合下面这个固件，整合您的网络收音机，做成整合收音机的多WAN固件，造福广大机友啊
+
+http://www.openwrt.org.cn/bbs/vi ... &extra=page%3D1
+
+linux小白期盼着
+
+自己折腾了N久也没有搞定，汗......
+回复 支持 反对 使用道具 举报
+
+6#
+ 慕然 发表于 2011-1-8 23:56:19 | 只看该作者
+不知道中兴618B能不能用这个固件？
+回复 支持 反对 使用道具 举报
+
+7#
+ jameslord 发表于 2011-5-5 01:03:27 | 只看该作者
+折腾目的:没有USB红外遥控器套件,通过安装lighttpd+php,编写简单php,实现播放网络电台web转台功能
+环境:336 ...
+i6p 发表于 2010-12-21 21:53
+
+
+lz用的是哪种USB声卡？
+回复 支持 反对 使用道具 举报
+
+8#
+ yqj009 发表于 2011-5-27 21:29:04 | 只看该作者
+附件已失效，能下载，打不开了。。。哪位网友重传一下？
+回复 支持 反对 使用道具 举报
+
+9#
+  楼主| i6p 发表于 2011-5-28 10:59:19 | 只看该作者
+本帖最后由 i6p 于 2011-5-28 11:03 编辑
+
+
+更新一个自己空间上的看能不能用~~~
+http://idol.8800.org:81/radio.rar
+回复 支持 反对 使用道具 举报
+
+10#
+ beinglove 发表于 2011-6-2 20:18:24 | 只看该作者
+openwrt 原来可以那么强大啊~
+回复 支持 反对 使用道具 举报
+下一页 ?
+123 / 3 页下一页返回列表发新帖
+高级模式
+BColorImageLinkQuoteCodeSmilies
+您需要登录后才可以回帖 登录 | 立即注册  
+本版积分规则发表回复 回帖后跳转到最后一页
+小黑屋|手机版|Archiver|OpenWrt中文门户. ( 湘ICP备10006320号 ) 
+GMT+8, 2015-1-11 14:49 , Processed in 0.597338 second(s), 21 queries .
+Powered by Discuz! X3.2
+? 2001-2013 Comsenz Inc.

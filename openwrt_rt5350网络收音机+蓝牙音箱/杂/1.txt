@@ -1,0 +1,197 @@
+设为首页收藏本站开启辅助访问切换到宽版
+OpenWrt中文网
+用户名
+	自动登录	 找回密码
+密码		登录	 立即注册
+QQ登录
+只需一步，快速开始
+快捷导航
+帮助OpenWrt中文网下载中心开发中心门户帮助OpenWrt中文网家园帮助排行榜高级搜索
+装机设主页 每台赚5.2元  终身领工资
+	
+帖子
+搜索	
+热搜: 摄像头网络摄像头定时开关U盘下载机移动硬盘4530声卡u盘WLAN交换机花生壳自动代理内存小Asterisk300rv3多拨hg255d叠加nwan
+OpenWrt中文网?论坛?OpenWrt?下载专区?把路由器变成音乐播放器和网络收音机，支持摇控 ...
+12345678 / 8 页下一页
+返回列表发新帖
+查看: 49322|回复: 74
+打印 上一主题 下一主题 把路由器变成音乐播放器和网络收音机，支持摇控 [复制链接]
+
+电梯直达跳转到指定楼层 1#
+ nighthk3 发表于 2010-6-10 10:35:40 | 只看该作者 回帖奖励
+如题，其它见附件
+
+ftp://csjfyy.com/soft/Program/rmplayer.tar.bz2
+分享到:  
+QQ好友和群QQ好友和群
+ 
+QQ空间QQ空间
+ 
+腾讯微博腾讯微博
+ 
+腾讯朋友腾讯朋友
+ 收藏收藏21
+ 
+分享分享
+回复 使用道具 举报
+
+推荐
+  楼主| nighthk3 发表于 2010-6-24 17:37:40 | 只看该作者
+楼上没有安装我提到的必要软件包, 下面我就简单说明一下
+
+声卡驱动
+kmod-usb-audio, alsa-utils
+
+USB存储设备驱动
+kmod-usb-ohci,  kmod-usb2, kmod-usb-storage
+
+挂载U盘必备的字符集
+kmod-nls-base, kmod-nls-cp437, kmod-nls-iso8859-1, kmod-nls-utf8
+
+文件系统支持
+kmod-fs-ext3, kmod-fs-vfat,  kmod-fuse, ntfs-3g
+
+块设备(U盘)自动挂载
+block-hotplug
+
+输入设备驱动
+kmod-input-evdev
+
+mplayer 需要
+libiconv, zlib, libmad
+回复 支持 1 反对 0 使用道具 举报
+
+2#
+ admin 发表于 2010-6-10 11:19:30 | 只看该作者
+最好是多加一些说明
+回复 支持 反对 使用道具 举报
+
+3#
+  楼主| nighthk3 发表于 2010-6-10 11:38:37 | 只看该作者
+附件里的说明很详细了
+这个功能是用mplayer实现的，自己编了个遥控客户端
+想要开机自动启动的话把启动命令加到/etc/rc.local中去
+
+我的摇控器是从这购买的
+http://item.taobao.com/item.htm?id=2759881087
+
+回复 支持 反对 使用道具 举报
+
+4#
+ mysxl 发表于 2010-6-10 22:49:51 | 只看该作者
+本帖最后由 mysxl 于 2010-6-10 22:57 编辑
+
+
+楼主说的太简单了
+帮楼主补充一下：
+
+rmplayer
+
+----------
+版本 0.0.1
+----------
+
+内容
+---------
+1. 软件目的
+    使用键盘、遥控器或其它输入设备控制 mplayer 在路由器上播放音乐。
+
+2. 硬件准备
+    一台有USB接口的路由器，一块USB声卡，一个输入设备，一个ADSL设备。
+    路由器我试过rg100a-aa的，其它带USB应该也可以，USB声卡芯片不要tenx的，效果很差，输入
+    设备只要evDev驱动支持的都可以，建议使用遥控器，操作很方便，价格也便宜，淘宝上几十块钱一个。
+    
+3. 系统环境
+    操作系统 -- openwrt， 我用的是Backfire 10.03。
+    必要软件包 -- kmod-usb-audio, alsa-utils, kmod-usb-storage, kmod-usb-ohci, 
+                kmod-usb2, kmod-usb-hid, kmod-nls-base, kmod-nls-cp437,
+                kmod-nls-iso8859-1, kmod-nls-utf8, kmod-fs-ext3, kmod-fs-vfat,
+                kmod-fuse, ntfs-3g, block-hotplug, libiconv, kmod-input-evdev,
+                zlib, libmad
+                
+4. 安装
+    - 复制mplayer, rmplayer, rmplayer.conf, cmdlist.conf到你任意喜欢的位置，跟据
+        需要修改rmplayer.conf， cmdlist.conf文件。
+        
+    - 由于路由器性能限制，没有浮点运算单元，目前只支持 mp3(libmad), wmav1, wmav2, 
+      aac(faad2), flac, ogg(tremor) 这几种有定点解码库的格式, 其中 wma 解码用到了 
+      Rockbox 的定点库。
+        
+    - 第一次运行请先执行rmplayer -c --path=<配置文件存放路径>, 如果配置路径没有指定则
+        默认取＄HOME/.rmplayer为配置路径。
+        
+    - 运行请执行 rmplayer -r --path=<配置文件存放路径>
+    
+5. 联系
+    电子邮件: nighthk3@126.com
+    
+
+附：一些网络电台地址
+11=CRI怀旧金曲=mms://live.cri.cn/oldies
+12=CRI华语广播=mms://219.142.120.27/chn
+13=CRI轻松调频=mms://enmms.chinabroadcast.cn/fm91.5
+14=CRI多语直播=mms://live.hitfm.cn/fm887
+20=CRI写意民谣频道=mms://live.cri.cn/country
+22=Love Radio=mms://218.1.74.230/ml103
+21=上海体育广播=mms://218.1.74.230/sport
+23=动感101=mms://218.1.74.230/dg101
+24=都市792=mms://218.1.74.230/ds792
+75=CRI都市流行频道=mms://live.cri.cn/pop/
+74=HIT FM=mms://live.hitfm.cn/fm887
+129=音乐之声超级893=mms://202.103.67.185/音乐
+130=上海戏曲频道=mms://218.1.74.230/sgxj
+131=经典947=mms://218.1.74.230/jd947
+猫扑电台=mms://ting.mop.com/mopradio
+[天津广播电台]
+新闻广播=mms://61.136.19.228/live1
+音乐广播=mms://61.136.19.228/live2
+经济广播=mms:///61.136.19.228/live3
+文艺广播=mms://61.136.19.228/live4
+交通广播=mms://61.136.19.228/live5
+生活广播=mms://61.136.19.228/live6
+滨海广播=mms:///61.136.19.228/live7
+小说广播=mms://61.136.19.228/live8
+娱乐广播=mms://61.136.19.228/live9
+回复 支持 反对 使用道具 举报
+
+5#
+ yuwenzhe 发表于 2010-6-10 23:11:07 | 只看该作者
+不错，支持。只是还要在电脑上操作吧？建立播放列表等等
+回复 支持 反对 使用道具 举报
+
+6#
+ ruins 发表于 2010-6-11 23:35:13 | 只看该作者
+音箱和声呀接在哪儿了？ DB120里内置了吗？
+回复 支持 反对 使用道具 举报
+
+7#
+ madwolfs 发表于 2010-6-12 09:21:17 | 只看该作者
+回复 6# ruins 
+
+USB声卡
+回复 支持 反对 使用道具 举报
+
+8#
+ xhh2001 发表于 2010-6-17 17:28:47 | 只看该作者
+呵呵，这个很强悍，不错不错，
+
+高手们先来玩玩
+回复 支持 反对 使用道具 举报
+
+9#
+ hz200 发表于 2010-6-24 14:10:31 | 只看该作者
+root@OpenWrt:/bin# mplayer
+mplayer: can't load library 'libiconv.so.2'
+如何处理？？？？？
+回复 支持 反对 使用道具 举报
+下一页 ?
+12345678 / 8 页下一页返回列表发新帖
+高级模式
+BColorImageLinkQuoteCodeSmilies
+您需要登录后才可以回帖 登录 | 立即注册  
+本版积分规则发表回复 回帖后跳转到最后一页
+小黑屋|手机版|Archiver|OpenWrt中文门户. ( 湘ICP备10006320号 ) 
+GMT+8, 2015-1-11 15:00 , Processed in 0.180188 second(s), 20 queries .
+Powered by Discuz! X3.2
+? 2001-2013 Comsenz Inc.

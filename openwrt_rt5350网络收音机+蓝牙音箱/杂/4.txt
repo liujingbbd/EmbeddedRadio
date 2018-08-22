@@ -1,0 +1,138 @@
+openwrt实现远程实时监听     [复制链接]
+akaven
+
+电梯直达跳转到指定楼层 1#
+ 发表于 2014-5-6 21:02 | 只看该作者 回帖奖励
+
+本帖最后由 akaven 于 2014-5-7 14:35 编辑
+
+
+设备：
+路由器
+tp-link wr841n v3 改16m flash 64m内存（刷的8m固件）
+openwrt backfire r31676内核版本2.6.32.27（tp-link wr941n v2改8m flash同样适用）
+
+usb声卡
+我使用的是一个摄像头自带声卡，同时也集成了麦克(双麦克)，淘宝现在售价16-20元，同时这个摄像头还可以作为监控摄像头用，支持mjpg-stream和motion（可录像，移动侦测），支持如意云
+
+
+
+或者使用淘宝上5-10元的usb声卡也可，在输入口插入麦克
+无论使用什么样的声卡，一定要在/dev里面能够识别到dsp
+
+使用工具：
+serial putty winscp VLC
+关于怎样进入路由器命令行里面执行命令，使用winscp上传下载修改文件及权限，请自行搜索本论坛
+
+教程：
+为了图省劲，我是一直在路由上插的ttl线用serial来操作的，如果机器正常的话，用putty登陆进去也是可以的。
+我使用的固件是没有luci的，所以刷完了无法web登陆，需要先安装luci
+
+opkg update
+opkg install luci
+opkg install luci-i18n-chinese
+然后执行/etc/init.d/uhttpd enable
+/etc/init.d/uhttpd start
+这样就可以登录web界面了
+
+
+安装usb驱动
+
+opkg install kmod-usb2
+opkg install usbutils
+opkg install kmod-usb-core
+opkg install libusb
+
+这个时候查看一下usb是否ok
+执行命令
+lsusb
+
+正常的话会看到usb接口及上面设备的信息的
+如果出现unable to initialize libusb: -99
+可以试试在启动脚本里添加
+mount -t usbfs none /proc/bus/usb/
+
+当lsusb出现类似如下信息时表示usb查看功能和驱动正常
+root@OpenWrt:/# lsusb
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 001 Device 002: ID 1a40:0101 TERMINUS TECHNOLOGY INC. USB-2.0 4-Port HUB
+Bus 001 Device 003: ID 05a9:2641 OmniVision Technologies, Inc.
+
+能够看到一个usb2.0接口的4口hub，一个OmniVision Technologies的摄像头，上面集成声卡及麦克
+接下来安装声卡驱动
+opkg install kmod-usb-audio
+
+到这里一定要确认下声卡是否安装好
+root@OpenWrt:/# ls /dev
+1-1                 mtd2                network_throughput
+1-1.4               mtd2ro              null
+audio               mtd3                port
+console             mtd3ro              ppp
+cpu_dma_latency     mtd4                ptmx
+dsp                 mtd4ro              pts
+full                mtd5                random
+kmsg                mtd5ro              shm
+log                 mtdblock0           snd
+mem                 mtdblock1           tty
+mixer               mtdblock2           ttyS0
+mtd0                mtdblock3           urandom
+mtd0ro              mtdblock4           usb1
+mtd1                mtdblock5           watchdog
+mtd1ro              network_latency     zero
+看到显示有audio dsp，说明声卡安装完好，驱动也ok了
+
+接下来需要架设我们的两个程序ices和icecast
+ices负责取信号源供给icecast，而icecast则负责把信号源转成流媒体转发出去
+执行命令
+opkg install alsa-lib
+opkg install ices
+opkg install icecast
+
+安装的ices 版本为2.0.1 icecast为2.3.2
+这个版本的icecast支持mp3和ogg，而ices则只支持ogg
+接下来配置ices和icecast，一定是icecast配置好了之后再启动ices
+用winscp进入/var/log/新建两个文件夹ices和icecast，用来存储log日志
+
+修改icecast的配置文件/ect/icecast.xml，内容如见附件
+在/etc里面新建ices的配置文件ices-oss.xml，内容见附件
+
+再准备好客户端工具vlc windows版
+http://get.videolan.org/vlc/2.1.3/win32/vlc-2.1.3-win32.exe
+由于日志文件路径为/var/log/icecast和/var/log/ices
+需要将log文件夹的权限设置为777（默认755），而重启后权限恢复
+所以在开机启动里面增加一条
+chmod 777 /var/log
+
+进入到管理界面启动icecast和ices
+root@OpenWrt:/# icecast            
+Icecast 2.3.2
+usage: icecast [-b -v] -c <file>
+options:
+        -c <file>       Specify configuration file
+        -v              Display version info
+        -b              Run icecast in the background
+root@OpenWrt:/# icecast -b -c /etc/icecast.xml
+Starting icecast2
+Detaching from the console
+root@OpenWrt:/# Changed groupid to 65534.
+Changed userid to 65534.
+这个时候使用top命令（ctrl+c退出）可以看到icecast已经在后台运行了
+root@OpenWrt:/# ices /etc/ices-oss.xml
+打开http://192.168.1.1:8000查看
+
+如果有Mount Point /example1.ogg  M3U则说明你的监听服务器端已经设置好了
+
+这个时候打开VLC选择打开网络串流
+地址写http://192.168.1.1:8000/example1.ogg.m3u
+就可以开始监听路由器的麦克了
+192.168.1.1是你路由器默认的lan口ip地址，再配合路由器的ddns和端口映射，那么远程实时监听就做好了
+友情提示：该教程仅供学习参考，请勿用作其他用途，请勿将usb声卡内置，学习后请24小时内彻底删除，因本教程引发的各种法律问题，作者概不负责。
+
+841n v3（921n v2）8m（16m也可）flash 64m内存 固件
+http://115.com/file/e78jn64r#该固件参考帖子
+http://www.right.com.cn/forum/forum.php?mod=viewthread&tid=80198
+ices配置文件 
+icecast配置文件
+由于icecast开启的时候选择的参数是-b，后台运行，所以如果要关闭该进程需要执行命令
+killall icecast
+ices暂时还不能后台运行，记得有支持后台运行的插件，这个再议
